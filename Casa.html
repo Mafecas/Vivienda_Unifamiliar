@@ -1332,17 +1332,29 @@ var MAT={
 
   g.add(LBL('RED AC\nCPVC ½"',5,1.2,7.3,'#ff5533',1.3));
 
-  /* Desagüe */
-  TUBE(g,[[7,hD,-1.2],[7,hD,0.5]],rD,MAT.pDR);
+  /* Desagüe — Red con 3 cajas de inspección (NTC 1500) */
+  /* CI-1: Baños privados — donde convergen baño ppal + baño 2 */
+  /* CI-2: Cocina/Ropas/B.Social — donde convergen cocina + ropas + baño social */
+  /* CI-3: Exterior — obligatoria antes del alcantarillado */
+
+  /* ── Baño principal + Baño 2 → CI-1 ── */
   TUBE(g,[[4.3,hD,0.6],[4,hD,0.5],[7,hD,0.5]],rD*0.7,MAT.pDR);
   TUBE(g,[[7.2,hD,0.6],[7,hD,0.5]],rD,MAT.pDR);
   TUBE(g,[[7.5,hD,1.5],[7.5,hD,0.5],[7,hD,0.5]],rD*0.7,MAT.pDR);
-  /* Baño social desagüe */
-  TUBE(g,[[14.2,hD,5.7],[14,hD,5.5],[14,hD,5],[14,hD,0.5],[7,hD,0.5]],rD*0.7,MAT.pDR);
-  /* Cocina */
-  TUBE(g,[[9.5,hD,9.2],[9.5,hD,7],[9.5,hD,5],[9.5,hD,0.5],[7,hD,0.5]],rD*0.7,MAT.pDR);
-  /* Ropas */
+
+  /* ── CI-1 → CI-3 (colector sur) ── */
+  TUBE(g,[[7,hD,0.5],[7,hD,-0.5]],rD,MAT.pDR);
+
+  /* ── Baño social + Cocina + Ropas → CI-2 ── */
+  TUBE(g,[[14.2,hD,5.7],[14,hD,5.5],[14,hD,5],[12,hD,5]],rD*0.7,MAT.pDR);
+  TUBE(g,[[9.5,hD,9.2],[9.5,hD,7],[9.5,hD,5],[12,hD,5]],rD*0.7,MAT.pDR);
   TUBE(g,[[13.5,hD,9.2],[13.5,hD,7],[13.5,hD,5],[14,hD,5]],rD*0.7,MAT.pDR);
+
+  /* ── CI-2 → CI-3 (colector hacia exterior) ── */
+  TUBE(g,[[12,hD,5],[12,hD,0],[7,hD,0],[7,hD,-0.5]],rD,MAT.pDR);
+
+  /* ── CI-3 → Alcantarillado público ── */
+  TUBE(g,[[7,hD,-0.5],[7,hD,-2.5]],rD,MAT.pDR);
 
   /* Ventilaciones */
   [[4.2,2],[7.5,1.5],[14,5.5]].forEach(function(v){
@@ -1360,12 +1372,27 @@ var MAT={
 
   g.add(LBL('RED DESAGÜE\nPVC-S 2"-4"',5.5,0.5,0.8,'#44cc66',1.3));
 
-  /* Caja inspección */
-  var ci=BX(0.6,0.6,0.6,new THREE.MeshStandardMaterial({color:0x2a5530,transparent:true,opacity:0.6}));
-  g.add(pos(ci,7,-0.5,-1.2));
-  var ceEdge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.62,0.62,0.62)),new THREE.LineBasicMaterial({color:0x55ee77}));
-  ceEdge.position.set(7,-0.5,-1.2);g.add(ceEdge);
-  g.add(LBL('CAJA INSP.\n0.60×0.60m',7,0.15,-1.2,'#44cc66',1));
+  /* ══ 3 CAJAS DE INSPECCIÓN 60×60cm ══ */
+  var ciMat=new THREE.MeshStandardMaterial({color:0x2a5530,transparent:true,opacity:0.6});
+  var ciEdgeMat=new THREE.LineBasicMaterial({color:0x55ee77});
+
+  /* CI-1: Baños privados (7, 0.5) — convergencia baño ppal + baño 2 */
+  var ci1=BX(0.6,0.6,0.6,ciMat);g.add(pos(ci1,7,-0.5,0.5));
+  var ce1=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.62,0.62,0.62)),ciEdgeMat);
+  ce1.position.set(7,-0.5,0.5);g.add(ce1);
+  g.add(LBL('CI-1\nBAÑOS\n0.60×0.60',7,0.3,0.5,'#44cc66',0.9));
+
+  /* CI-2: Cocina/Ropas/B.Social (12, 5) — convergencia zona de servicio */
+  var ci2=BX(0.6,0.6,0.6,ciMat);g.add(pos(ci2,12,-0.5,5));
+  var ce2=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.62,0.62,0.62)),ciEdgeMat);
+  ce2.position.set(12,-0.5,5);g.add(ce2);
+  g.add(LBL('CI-2\nCOC/ROPAS\n0.60×0.60',12,0.3,5,'#44cc66',0.9));
+
+  /* CI-3: Exterior — obligatoria antes de alcantarillado (7, -0.5) */
+  var ci3=BX(0.6,0.6,0.6,ciMat);g.add(pos(ci3,7,-0.5,-0.5));
+  var ce3=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.62,0.62,0.62)),ciEdgeMat);
+  ce3.position.set(7,-0.5,-0.5);g.add(ce3);
+  g.add(LBL('CI-3\nEXTERIOR\n→ALCANT.',7,0.3,-0.5,'#44cc66',0.9));
 })();
 
 /* ══════════════════════════════════════
@@ -1501,7 +1528,7 @@ var LEGS={
   0:{t:'ARQUITECTÓNICA',i:[[0,'#f7f3ec','Muros ext. 0.15m'],[0,'#f2ede6','Muros int. 0.12m'],[0,'#88aabb','Ventanas'],[0,'#7a5c1e','Puertas'],[0,'#5f6e52','Mobiliario'],[0,'#2255aa','Contador agua'],[0,'#bbaa00','Contador gas'],[0,'#333333','Contador eléctrico']]},
   1:{t:'CIMENTACIÓN — 26 ZAPATAS AISLADAS',i:[[1,'#7a7a7a','Zapata 1.20×1.20×1.00m'],[1,'#999999','Columna 0.30×0.30m'],[1,'#a8a8a8','Viga amarre 0.30×0.30m']]},
   2:{t:'INSTALACIÓN ELÉCTRICA — 7 CIRCUITOS',i:[[0,'#222222','Contador eléctrico (fachada)'],[0,'#1a1a1a','Tablero ppal. 2×60A'],[1,'#ee1111','Acometida + C-1/C-2 Ilum.'],[1,'#2266ff','C-3/C-4 Tomacorrientes'],[1,'#ff6622','C-5 Estufa 30A'],[1,'#8844ff','C-6 Lavadora 20A'],[0,'#ffee44','Luminarias'],[0,'#ffeedd','Tomas/Interruptores']]},
-  3:{t:'INSTALACIÓN HIDRÁULICA',i:[[0,'#1a55aa','Contador agua (fachada)'],[1,'#1a77cc','AF PVC-P ½"'],[1,'#dd3318','AC CPVC ½"'],[1,'#1a8a3a','Desagüe PVC-S 2"-4"'],[0,'#22cc55','Sifones'],[0,'#2a5530','Caja inspección'],[0,'#dd5515','Calentador a gas']]},
+  3:{t:'INSTALACIÓN HIDRÁULICA',i:[[0,'#1a55aa','Contador agua (fachada)'],[1,'#1a77cc','AF PVC-P ½"'],[1,'#dd3318','AC CPVC ½"'],[1,'#1a8a3a','Desagüe PVC-S 2"-4"'],[0,'#22cc55','Sifones'],[0,'#2a5530','3 Cajas inspección 60×60'],[0,'#dd5515','Calentador a gas']]},
   4:{t:'INSTALACIÓN DE GAS',i:[[0,'#ccaa00','Contador gas (fachada)'],[1,'#ddaa00','Cobre tipo L ½"'],[1,'#bbaa00','Flexible certificado'],[0,'#dd0000','Válvulas de corte'],[1,'#777','Ducto evacuación Ø4"']]},
   5:{t:'CUBIERTA — 4 AGUAS',i:[[0,'#ab5030','Teja termoacústica'],[0,'#7a3d1e','Cumbrera'],[0,'#3a7a9a','Bajantes PVC Ø3"']]}
 };
