@@ -941,7 +941,7 @@ var MAT={
 
 /* ══════════════════════════════════════
    CONTADORES EN FACHADA (siempre visibles)
-   Agua x=1, Gas x=4, Electricidad x=6.5
+   Agua x=1, Gas x=4, Electricidad x=8.5
    ══════════════════════════════════════ */
 (function buildMeters(){
   var g=GR.meters;
@@ -986,25 +986,25 @@ var MAT={
 
   /* ── CONTADOR ELÉCTRICO ── */
   var elecCaja=BX(0.4,0.55,0.15,new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5,roughness:0.3}));
-  elecCaja.position.set(6.5,1.6,10.1);g.add(elecCaja);
+  elecCaja.position.set(8.5,1.6,10.1);g.add(elecCaja);
   /* Tapa */
-  g.add(pos(BX(0.36,0.48,0.03,new THREE.MeshStandardMaterial({color:0x333333,metalness:0.6,roughness:0.15})),6.5,1.6,10.19));
+  g.add(pos(BX(0.36,0.48,0.03,new THREE.MeshStandardMaterial({color:0x333333,metalness:0.6,roughness:0.15})),8.5,1.6,10.19));
   /* Disco medidor */
   var discoE=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.06,12),new THREE.MeshStandardMaterial({color:0x444444,metalness:0.7}));
-  discoE.rotation.x=Math.PI/2;discoE.position.set(6.5,1.65,10.16);g.add(discoE);
+  discoE.rotation.x=Math.PI/2;discoE.position.set(8.5,1.65,10.16);g.add(discoE);
   /* Vidrio */
   var vidE=new THREE.Mesh(new THREE.CircleGeometry(0.045,12),new THREE.MeshStandardMaterial({color:0xccddff,transparent:true,opacity:0.4}));
-  vidE.position.set(6.5,1.65,10.2);g.add(vidE);
-  /* Ductos de salida (2 tubos rojos) */
+  vidE.position.set(8.5,1.65,10.2);g.add(vidE);
+  /* Ductos de salida (2 tubos) */
   var tuboEM=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.3,metalness:0.5});
-  g.add(pos(BX(0.03,0.03,0.25,tuboEM),6.35,1.4,10.2));
-  g.add(pos(BX(0.03,0.03,0.25,tuboEM),6.65,1.4,10.2));
+  g.add(pos(BX(0.03,0.03,0.25,tuboEM),8.35,1.4,10.2));
+  g.add(pos(BX(0.03,0.03,0.25,tuboEM),8.65,1.4,10.2));
   /* Cable de acometida visible (sube a poste) */
   var cableM=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.5});
   var cableUp=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,1.2,6),cableM);
-  cableUp.position.set(6.5,2.5,10.15);g.add(cableUp);
+  cableUp.position.set(8.5,2.5,10.15);g.add(cableUp);
   /* Etiqueta */
-  g.add(LBL('ELEC',6.5,2.3,10.35,'#ee4444',0.8));
+  g.add(LBL('ELEC',8.5,2.3,10.35,'#ee4444',0.8));
 
   /* ── Fondo de muro detrás de los contadores (resaltar) ── */
   var bgMat=new THREE.MeshStandardMaterial({color:0xf0ece5,roughness:0.5,side:THREE.DoubleSide});
@@ -1152,28 +1152,28 @@ var MAT={
   /* ═══ CONTADOR ELÉCTRICO EN FACHADA ═══ */
   /* Caja del contador en fachada norte */
   var contElecMat=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5,roughness:0.3});
-  g.add(pos(BX(0.4,0.6,0.15,contElecMat),6.5,1.6,10.15));
+  g.add(pos(BX(0.4,0.6,0.15,contElecMat),8.5,1.6,10.15));
   /* Tapa del contador */
-  g.add(pos(BX(0.35,0.5,0.04,new THREE.MeshStandardMaterial({color:0x333333,metalness:0.6,roughness:0.2})),6.5,1.6,10.26));
+  g.add(pos(BX(0.35,0.5,0.04,new THREE.MeshStandardMaterial({color:0x333333,metalness:0.6,roughness:0.2})),8.5,1.6,10.26));
   /* Disco/reloj del medidor */
   var discoElec=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.14,12),new THREE.MeshStandardMaterial({color:0x444444,metalness:0.7,roughness:0.2}));
-  discoElec.rotation.x=Math.PI/2;discoElec.position.set(6.5,1.65,10.15);g.add(discoElec);
+  discoElec.rotation.x=Math.PI/2;discoElec.position.set(8.5,1.65,10.15);g.add(discoElec);
   /* Vidrio del disco */
   var vidrioElec=new THREE.Mesh(new THREE.CircleGeometry(0.05,12),new THREE.MeshStandardMaterial({color:0xccddff,transparent:true,opacity:0.4,metalness:0.3}));
-  vidrioElec.position.set(6.5,1.65,10.23);g.add(vidrioElec);
-  g.add(LBL('CONTADOR\nELÉCTRICO\nBIF. 2×60A',6.5,2.7,10.6,'#ff4444',1.3));
+  vidrioElec.position.set(8.5,1.65,10.23);g.add(vidrioElec);
+  g.add(LBL('CONTADOR\nELÉCTRICO\nBIF. 2×60A',8.5,2.7,10.6,'#ff4444',1.3));
 
   /* Acometida eléctrica desde red pública (poste) */
-  TUBE(g,[[6.5,4,14],[6.5,3.5,12],[6.5,2.5,10.5],[6.5,1.9,10.2]],R*1.3,mat);
-  g.add(LBL('ACOMETIDA\nRED ELÉCTRICA',6.5,4.3,13,'#ff4444',1));
+  TUBE(g,[[8.5,4,14],[8.5,3.5,12],[8.5,2.5,10.5],[8.5,1.9,10.2]],R*1.3,mat);
+  g.add(LBL('ACOMETIDA\nRED ELÉCTRICA',8.5,4.3,13,'#ff4444',1));
   /* Poste simplificado */
   var posteMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.6});
   var poste=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,6,8),posteMat);
-  poste.position.set(6.5,3,14);g.add(poste);
+  poste.position.set(8.5,3,14);g.add(poste);
 
-  /* Conexión del contador al tablero interior (ducto subterráneo) */
-  TUBE(g,[[6.5,1.3,10.15],[6.5,0.1,10.15],[6.5,0.1,9],[8.9,0.1,9],[8.9,0.1,5.08],[8.9,1.2,5.08]],R*1.2,mat);
-  g.add(LBL('DUCTO\nCONTADOR→TABLERO',7.5,0.6,9,'#ff4444',0.9));
+  /* Conexión del contador al tablero interior (ducto corto, mismo eje X) */
+  TUBE(g,[[8.5,1.3,10.15],[8.5,0.1,10.15],[8.5,0.1,9],[8.9,0.1,9],[8.9,0.1,5.08],[8.9,1.2,5.08]],R*1.2,mat);
+  g.add(LBL('DUCTO\nCONTADOR→TABLERO',8.5,0.6,9.5,'#ff4444',0.9));
 
   /* Tablero de tacos (breaker panel) */
   g.add(pos(BX(0.5,0.65,0.12,new THREE.MeshStandardMaterial({color:0x1a1a1a,metalness:0.6,roughness:0.3})),8.9,1.5,5.08));
