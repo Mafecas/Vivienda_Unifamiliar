@@ -503,19 +503,104 @@ var MAT={
     g.add(pos(BX(t+0.02, 0.04, w+0.08, frameMat), x, doorH+0.2, z));
   }
 
-  /* ═══ EXTERIOR WALLS ═══ */
-  /* North z=10: main entrance at x=2.5, w=1.0 */
-  HW(10, [[0,2.0],[3.0,15]], ET, MAT.wallE);
+  /* ═══ EXTERIOR WALLS WITH WINDOW OPENINGS ═══
+     Window openings cut into walls like door openings.
+     Sill height: 0.90m (y=1.10), Header: 2.30m (y=2.50), Window H=1.40m
+  */
+  var winSill=0.90, winTop=2.30, winH=winTop-winSill;
+  var frameMat2=new THREE.MeshStandardMaterial({color:0x3a3a3a,roughness:0.25,metalness:0.55}); /* aluminum frame */
+  var sillMat=new THREE.MeshStandardMaterial({color:0xe8e0d0,roughness:0.3,metalness:0.05}); /* concrete sill */
+  var glassMat=new THREE.MeshStandardMaterial({color:0x88bbdd,roughness:0.0,transparent:true,opacity:0.35,metalness:0.4,side:THREE.DoubleSide});
+
+  /* Helper: build a full window in horizontal wall */
+  function HWIN(cx,z,ww,t,wallMat){
+    /* lintel (dintel) above window */
+    g.add(pos(BX(ww+0.1, WH-winTop, t, wallMat), cx, winTop+(WH-winTop)/2+0.2, z));
+    /* wall below window (antepecho) */
+    g.add(pos(BX(ww+0.1, winSill, t, wallMat), cx, winSill/2+0.2, z));
+    /* sill (repisa exterior) */
+    g.add(pos(BX(ww+0.2, 0.04, t+0.1, sillMat), cx, winSill+0.2, z+(z>=5?0.05:-0.05)));
+    /* frame outer rectangle */
+    var fw=0.04;
+    g.add(pos(BX(ww, fw, t+0.02, frameMat2), cx, winSill+fw/2+0.2, z));  /* bottom frame */
+    g.add(pos(BX(ww, fw, t+0.02, frameMat2), cx, winTop-fw/2+0.2, z));   /* top frame */
+    g.add(pos(BX(fw, winH, t+0.02, frameMat2), cx-ww/2+fw/2, winSill+winH/2+0.2, z)); /* left frame */
+    g.add(pos(BX(fw, winH, t+0.02, frameMat2), cx+ww/2-fw/2, winSill+winH/2+0.2, z)); /* right frame */
+    /* mullion vertical center */
+    g.add(pos(BX(0.03, winH-0.08, t+0.01, frameMat2), cx, winSill+winH/2+0.2, z));
+    /* mullion horizontal center */
+    g.add(pos(BX(ww-0.08, 0.03, t+0.01, frameMat2), cx, winSill+winH/2+0.2, z));
+    /* glass panes (4 quadrants) */
+    var gw=(ww-0.11)/2, gh=(winH-0.11)/2;
+    g.add(pos(BX(gw, gh, 0.01, glassMat), cx-gw/2-0.025, winSill+0.06+gh/2+0.2, z));
+    g.add(pos(BX(gw, gh, 0.01, glassMat), cx+gw/2+0.025, winSill+0.06+gh/2+0.2, z));
+    g.add(pos(BX(gw, gh, 0.01, glassMat), cx-gw/2-0.025, winTop-0.06-gh/2+0.2, z));
+    g.add(pos(BX(gw, gh, 0.01, glassMat), cx+gw/2+0.025, winTop-0.06-gh/2+0.2, z));
+  }
+
+  /* Helper: build a full window in vertical wall */
+  function VWIN(x,cz,ww,t,wallMat){
+    /* lintel above */
+    g.add(pos(BX(t, WH-winTop, ww+0.1, wallMat), x, winTop+(WH-winTop)/2+0.2, cz));
+    /* wall below */
+    g.add(pos(BX(t, winSill, ww+0.1, wallMat), x, winSill/2+0.2, cz));
+    /* sill */
+    g.add(pos(BX(t+0.1, 0.04, ww+0.2, sillMat), x+(x<7.5?-0.05:0.05), winSill+0.2, cz));
+    /* frame */
+    var fw=0.04;
+    g.add(pos(BX(t+0.02, fw, ww, frameMat2), x, winSill+fw/2+0.2, cz));
+    g.add(pos(BX(t+0.02, fw, ww, frameMat2), x, winTop-fw/2+0.2, cz));
+    g.add(pos(BX(t+0.02, winH, fw, frameMat2), x, winSill+winH/2+0.2, cz-ww/2+fw/2));
+    g.add(pos(BX(t+0.02, winH, fw, frameMat2), x, winSill+winH/2+0.2, cz+ww/2-fw/2));
+    /* mullions */
+    g.add(pos(BX(t+0.01, winH-0.08, 0.03, frameMat2), x, winSill+winH/2+0.2, cz));
+    g.add(pos(BX(t+0.01, 0.03, ww-0.08, frameMat2), x, winSill+winH/2+0.2, cz));
+    /* glass */
+    var gw=(ww-0.11)/2, gh=(winH-0.11)/2;
+    g.add(pos(BX(0.01, gh, gw, glassMat), x, winSill+0.06+gh/2+0.2, cz-gw/2-0.025));
+    g.add(pos(BX(0.01, gh, gw, glassMat), x, winSill+0.06+gh/2+0.2, cz+gw/2+0.025));
+    g.add(pos(BX(0.01, gh, gw, glassMat), x, winTop-0.06-gh/2+0.2, cz-gw/2-0.025));
+    g.add(pos(BX(0.01, gh, gw, glassMat), x, winTop-0.06-gh/2+0.2, cz+gw/2+0.025));
+  }
+
+  /*
+     NORTH z=10: door x=2.0→3.0
+     Windows: N1 center x=6.0 w=2.0, N2 center x=10.75 w=1.5, N3 center x=13.5 w=1.2
+     Wall segments: [0,2.0] DOOR [3.0,4.9] [7.1,9.9] [11.6,12.8] [14.2,15]
+  */
+  HW(10, [[0,2.0],[3.0,4.9],[7.1,9.9],[11.6,12.8],[14.2,15]], ET, MAT.wallE);
   HDR(2.5, 10, 1.0, ET, MAT.wallE);
+  HWIN(6.0, 10, 2.0, ET, MAT.wallE);   /* N1: sala-comedor */
+  HWIN(10.75, 10, 1.5, ET, MAT.wallE); /* N2: cocina */
+  HWIN(13.5, 10, 1.2, ET, MAT.wallE);  /* N3: ropas */
 
-  /* South z=0: no doors */
-  HW(0, [[0,15]], ET, MAT.wallE);
+  /*
+     SOUTH z=0: no doors
+     Windows: S1 center x=2.5 w=2.0, S2 center x=8.5 w=2.0, S3 center x=13.0 w=2.0
+     Wall segments: [0,1.4] [3.6,7.4] [9.6,11.9] [14.1,15]
+  */
+  HW(0, [[0,1.4],[3.6,7.4],[9.6,11.9],[14.1,15]], ET, MAT.wallE);
+  HWIN(2.5, 0, 2.0, ET, MAT.wallE);   /* S1: hab principal */
+  HWIN(8.5, 0, 2.0, ET, MAT.wallE);   /* S2: hab 2 */
+  HWIN(13.0, 0, 2.0, ET, MAT.wallE);  /* S3: hab 3 */
 
-  /* West x=0: no doors */
-  VW(0, [[0,10]], ET, MAT.wallE);
+  /*
+     WEST x=0: no doors
+     Windows: W1 center z=7.5 w=2.0 (sala), W2 center z=2.5 w=2.0 (hab ppal)
+     Wall segments: [0,1.4] [3.6,6.4] [8.6,10]
+  */
+  VW(0, [[0,1.4],[3.6,6.4],[8.6,10]], ET, MAT.wallE);
+  VWIN(0, 7.5, 2.0, ET, MAT.wallE);   /* W1: sala */
+  VWIN(0, 2.5, 2.0, ET, MAT.wallE);   /* W2: hab principal */
 
-  /* East x=15: no doors */
-  VW(15, [[0,10]], ET, MAT.wallE);
+  /*
+     EAST x=15: no doors
+     Windows: E1 center z=8.25 w=1.5 (ropas), E2 center z=3.0 w=2.0 (hab 3)
+     Wall segments: [0,1.9] [4.1,7.4] [9.1,10]
+  */
+  VW(15, [[0,1.9],[4.1,7.4],[9.1,10]], ET, MAT.wallE);
+  VWIN(15, 8.25, 1.5, ET, MAT.wallE);  /* E1: ropas */
+  VWIN(15, 3.0, 2.0, ET, MAT.wallE);   /* E2: hab 3 */
 
   /* ═══ INTERIOR WALLS — NEW LAYOUT ═══
      Paso de circulación x=9-13, z=5-7
@@ -566,21 +651,7 @@ var MAT={
   HDR(7.5, 2, 0.8, IT, MAT.wallI);
   VW(8.5, [[0,2]], IT, MAT.wallI);
 
-  /* ── WINDOWS ── */
-  var wins=[
-    [2.5,10,1.8,0.06],[6.9,10,1.8,0.06],[10.7,10,1.5,0.06],
-    [2,0,2,0.06],[8.4,0,1.8,0.06],[12.9,0,1.8,0.06],
-    [0,7,0.06,1.8],[0,2,0.06,1.5],
-    [15,8,0.06,1.2],[15,3,0.06,1.5]
-  ];
-  for(ri=0;ri<wins.length;ri++){
-    var wn=wins[ri];
-    var wm=BX(wn[2],1.2,wn[3],MAT.glass);
-    wm.position.set(wn[0],1.8,wn[1]);g.add(wm);
-    var ef=new THREE.EdgesGeometry(new THREE.BoxGeometry(wn[2]+0.01,1.21,wn[3]+0.01));
-    var ln=new THREE.LineSegments(ef,new THREE.LineBasicMaterial({color:0x555555}));
-    ln.position.copy(wm.position);g.add(ln);
-  }
+  /* ── WINDOWS: now built into walls above with HWIN/VWIN ── */
 
   /* ══ LUXURY INTERIOR — RESPETANDO PUERTAS ══
      Puertas y sus zonas libres:
