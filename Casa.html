@@ -277,7 +277,8 @@ var GR={
   elec:new THREE.Group(),
   plmb:new THREE.Group(),
   gas:new THREE.Group(),
-  roof:new THREE.Group()
+  roof:new THREE.Group(),
+  meters:new THREE.Group()  /* contadores — siempre visibles */
 };
 var k;for(k in GR)scene.add(GR[k]);
 GR.found.visible=false;
@@ -868,6 +869,83 @@ var MAT={
 })();
 
 /* ══════════════════════════════════════
+   CONTADORES EN FACHADA (siempre visibles)
+   Agua x=1, Gas x=4, Electricidad x=6.5
+   ══════════════════════════════════════ */
+(function buildMeters(){
+  var g=GR.meters;
+  var cajaM=new THREE.MeshStandardMaterial({color:0xcccccc,roughness:0.4,metalness:0.1});
+  var metalM=new THREE.MeshStandardMaterial({color:0x888888,roughness:0.2,metalness:0.6});
+
+  /* ── CONTADOR DE AGUA ── */
+  var aguaCaja=BX(0.4,0.5,0.18,new THREE.MeshStandardMaterial({color:0x2255aa,metalness:0.4,roughness:0.3}));
+  aguaCaja.position.set(1,0.7,10.12);g.add(aguaCaja);
+  /* Tapa */
+  g.add(pos(BX(0.36,0.42,0.03,new THREE.MeshStandardMaterial({color:0x3377cc,metalness:0.5,roughness:0.2})),1,0.7,10.22));
+  /* Reloj */
+  var relojA=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.06,12),new THREE.MeshStandardMaterial({color:0x224488,metalness:0.6}));
+  relojA.rotation.x=Math.PI/2;relojA.position.set(1,0.78,10.2);g.add(relojA);
+  /* Vidrio */
+  var vidA=new THREE.Mesh(new THREE.CircleGeometry(0.06,12),new THREE.MeshStandardMaterial({color:0xaaddff,transparent:true,opacity:0.5}));
+  vidA.position.set(1,0.78,10.24);g.add(vidA);
+  /* Tuberías visibles entrada/salida */
+  var tuboAM=new THREE.MeshStandardMaterial({color:0x3377bb,roughness:0.3,metalness:0.4});
+  g.add(pos(BX(0.04,0.04,0.3,tuboAM),1,0.55,10.25));
+  g.add(pos(BX(0.04,0.04,0.3,tuboAM),1,0.85,10.25));
+  /* Etiqueta */
+  g.add(LBL('AGUA',1,1.35,10.35,'#4488cc',0.8));
+
+  /* ── CONTADOR DE GAS ── */
+  var gasCaja=BX(0.35,0.45,0.18,new THREE.MeshStandardMaterial({color:0xbbaa00,metalness:0.35,roughness:0.3,emissive:0x665500,emissiveIntensity:0.15}));
+  gasCaja.position.set(4,1.35,10.12);g.add(gasCaja);
+  /* Tapa */
+  g.add(pos(BX(0.3,0.38,0.03,new THREE.MeshStandardMaterial({color:0xccbb22,metalness:0.5,roughness:0.2})),4,1.35,10.22));
+  /* Reloj */
+  var relojG=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.06,12),new THREE.MeshStandardMaterial({color:0x998800,metalness:0.6}));
+  relojG.rotation.x=Math.PI/2;relojG.position.set(4,1.42,10.2);g.add(relojG);
+  /* Regulador */
+  var regVis=new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10),new THREE.MeshStandardMaterial({color:0xddbb00,emissive:0x886600,emissiveIntensity:0.2}));
+  regVis.position.set(4.4,1.5,10.18);g.add(regVis);
+  /* Tubos entrada/salida */
+  var tuboGM=new THREE.MeshStandardMaterial({color:0xbbaa33,roughness:0.3,metalness:0.4});
+  g.add(pos(BX(0.035,0.035,0.3,tuboGM),4,1.2,10.25));
+  g.add(pos(BX(0.035,0.035,0.3,tuboGM),4,1.5,10.25));
+  /* Etiqueta */
+  g.add(LBL('GAS',4,2,10.35,'#ddaa00',0.8));
+
+  /* ── CONTADOR ELÉCTRICO ── */
+  var elecCaja=BX(0.4,0.55,0.15,new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5,roughness:0.3}));
+  elecCaja.position.set(6.5,1.6,10.1);g.add(elecCaja);
+  /* Tapa */
+  g.add(pos(BX(0.36,0.48,0.03,new THREE.MeshStandardMaterial({color:0x333333,metalness:0.6,roughness:0.15})),6.5,1.6,10.19));
+  /* Disco medidor */
+  var discoE=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.06,12),new THREE.MeshStandardMaterial({color:0x444444,metalness:0.7}));
+  discoE.rotation.x=Math.PI/2;discoE.position.set(6.5,1.65,10.16);g.add(discoE);
+  /* Vidrio */
+  var vidE=new THREE.Mesh(new THREE.CircleGeometry(0.045,12),new THREE.MeshStandardMaterial({color:0xccddff,transparent:true,opacity:0.4}));
+  vidE.position.set(6.5,1.65,10.2);g.add(vidE);
+  /* Ductos de salida (2 tubos rojos) */
+  var tuboEM=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.3,metalness:0.5});
+  g.add(pos(BX(0.03,0.03,0.25,tuboEM),6.35,1.4,10.2));
+  g.add(pos(BX(0.03,0.03,0.25,tuboEM),6.65,1.4,10.2));
+  /* Cable de acometida visible (sube a poste) */
+  var cableM=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.5});
+  var cableUp=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,1.2,6),cableM);
+  cableUp.position.set(6.5,2.5,10.15);g.add(cableUp);
+  /* Etiqueta */
+  g.add(LBL('ELEC',6.5,2.3,10.35,'#ee4444',0.8));
+
+  /* ── Fondo de muro detrás de los contadores (resaltar) ── */
+  var bgMat=new THREE.MeshStandardMaterial({color:0xf0ece5,roughness:0.5,side:THREE.DoubleSide});
+  /* Pequeña moldura/franja decorativa bajo los contadores */
+  var moldMat=new THREE.MeshStandardMaterial({color:0xd0c8b8,roughness:0.4});
+  g.add(pos(BX(8,0.04,0.02,moldMat),4,0.25,10.16));
+
+  /* Cache materials */
+  g.traverse(function(ch){if(ch.isMesh)origMat.set(ch,ch.material);});
+})();
+
+/* ══════════════════════════════════════
    3 · FOUNDATION — ZAPATAS 1.2×1.2×1.0m
    SOLO en muros estructurales (de carga)
    NO en tabiques de baños ni divisiones livianas
@@ -1000,9 +1078,39 @@ var MAT={
   var matL=PM(0x8844ff,0.4);
   var ti;
 
-  /* Tablero */
+  /* ═══ CONTADOR ELÉCTRICO EN FACHADA ═══ */
+  /* Caja del contador en fachada norte */
+  var contElecMat=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5,roughness:0.3});
+  g.add(pos(BX(0.4,0.6,0.15,contElecMat),6.5,1.6,10.15));
+  /* Tapa del contador */
+  g.add(pos(BX(0.35,0.5,0.04,new THREE.MeshStandardMaterial({color:0x333333,metalness:0.6,roughness:0.2})),6.5,1.6,10.26));
+  /* Disco/reloj del medidor */
+  var discoElec=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.14,12),new THREE.MeshStandardMaterial({color:0x444444,metalness:0.7,roughness:0.2}));
+  discoElec.rotation.x=Math.PI/2;discoElec.position.set(6.5,1.65,10.15);g.add(discoElec);
+  /* Vidrio del disco */
+  var vidrioElec=new THREE.Mesh(new THREE.CircleGeometry(0.05,12),new THREE.MeshStandardMaterial({color:0xccddff,transparent:true,opacity:0.4,metalness:0.3}));
+  vidrioElec.position.set(6.5,1.65,10.23);g.add(vidrioElec);
+  g.add(LBL('CONTADOR\nELÉCTRICO\nBIF. 2×60A',6.5,2.7,10.6,'#ff4444',1.3));
+
+  /* Acometida eléctrica desde red pública (poste) */
+  TUBE(g,[[6.5,4,14],[6.5,3.5,12],[6.5,2.5,10.5],[6.5,1.9,10.2]],R*1.3,mat);
+  g.add(LBL('ACOMETIDA\nRED ELÉCTRICA',6.5,4.3,13,'#ff4444',1));
+  /* Poste simplificado */
+  var posteMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.6});
+  var poste=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,6,8),posteMat);
+  poste.position.set(6.5,3,14);g.add(poste);
+
+  /* Conexión del contador al tablero interior (ducto subterráneo) */
+  TUBE(g,[[6.5,1.3,10.15],[6.5,0.1,10.15],[6.5,0.1,9],[8.9,0.1,9],[8.9,0.1,5.08],[8.9,1.2,5.08]],R*1.2,mat);
+  g.add(LBL('DUCTO\nCONTADOR→TABLERO',7.5,0.6,9,'#ff4444',0.9));
+
+  /* Tablero de tacos (breaker panel) */
   g.add(pos(BX(0.5,0.65,0.12,new THREE.MeshStandardMaterial({color:0x1a1a1a,metalness:0.6,roughness:0.3})),8.9,1.5,5.08));
-  g.add(LBL('TABLERO\n6 CIRC·2×60A',8.9,2.5,5.3,'#ff4444',1.4));
+  /* Detalle: breakers/tacos individuales */
+  for(var bk=0;bk<6;bk++){
+    g.add(pos(BX(0.35,0.06,0.08,new THREE.MeshStandardMaterial({color:bk<2?0x111:bk<4?0x222:0x333,metalness:0.5})),8.9,1.25+bk*0.08,5.08));
+  }
+  g.add(LBL('TABLERO\nPRINCIPAL\n7 CIRC·2×60A',8.9,2.6,5.3,'#ff4444',1.4));
   TUBE(g,[[8.9,1.8,5.08],[8.9,cY,5.08]],R*1.2,mat);
 
   /* C-1 Ilum social: sala+comedor+paso */
@@ -1094,12 +1202,33 @@ var MAT={
   var rF=0.06,rC=0.055,rD=0.08;
   var hF=0.4,hC=0.6,hD=-0.15;
 
-  /* Medidor */
-  g.add(pos(BX(0.3,0.25,0.2,new THREE.MeshStandardMaterial({color:0x1a55aa,metalness:0.5,roughness:0.3})),0.5,0.5,10.2));
-  g.add(LBL('MEDIDOR\nAGUA ¾"',0.5,1.2,10.5,'#44aaff',1.2));
+  /* ═══ ACOMETIDA + CONTADOR EN FACHADA NORTE ═══ */
+  /* Caja del contador empotrada en fachada */
+  var contAguaMat=new THREE.MeshStandardMaterial({color:0x1a55aa,metalness:0.5,roughness:0.3});
+  var contAguaCaja=BX(0.4,0.5,0.2,contAguaMat);
+  contAguaCaja.position.set(1,0.7,10.15);g.add(contAguaCaja);
+  /* Tapa del contador */
+  g.add(pos(BX(0.35,0.4,0.04,new THREE.MeshStandardMaterial({color:0x2266cc,metalness:0.6,roughness:0.2})),1,0.7,10.26));
+  /* Reloj/medidor */
+  var relojAgua=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.18,12),new THREE.MeshStandardMaterial({color:0x335599,metalness:0.7,roughness:0.2}));
+  relojAgua.rotation.x=Math.PI/2;relojAgua.position.set(1,0.75,10.12);g.add(relojAgua);
+  /* Vidrio del reloj */
+  var vidrioAgua=new THREE.Mesh(new THREE.CircleGeometry(0.065,12),new THREE.MeshStandardMaterial({color:0xaaddff,transparent:true,opacity:0.5,metalness:0.3}));
+  vidrioAgua.position.set(1,0.75,10.22);g.add(vidrioAgua);
+  g.add(LBL('CONTADOR\nAGUA ¾"',1,1.6,10.6,'#44aaff',1.2));
 
-  /* AF principal por muro oeste */
-  TUBE(g,[[0.5,hF,10.2],[0.5,hF,9.5],[0.5,hF,5],[0.5,hF,2],[0.5,hF,0.5]],rF,MAT.pAF);
+  /* Acometida: red pública → contador */
+  TUBE(g,[[1,hF-0.2,12.5],[1,hF-0.2,10.5],[1,hF,10.3]],rF*1.1,MAT.pAF);
+  g.add(LBL('ACOMETIDA\nRED PÚBLICA',1,0.8,12,'#44aaff',0.9));
+  /* Válvula de corte general antes del contador */
+  VALVE(g,1,hF,11,MAT.pAF);
+  g.add(LBL('V.C. GRAL.',1,1,11,'#44aaff',0.7));
+
+  /* Registro de corte interior (después del contador) */
+  VALVE(g,1,hF,10.0,MAT.pAF);
+
+  /* AF principal: del contador entra por fachada y recorre muro oeste */
+  TUBE(g,[[1,hF,10.15],[1,hF,10],[0.5,hF,10],[0.5,hF,9.5],[0.5,hF,5],[0.5,hF,2],[0.5,hF,0.5]],rF,MAT.pAF);
   /* Ramal cocina */
   TUBE(g,[[0.5,hF,9.5],[5,hF,9.5],[9.5,hF,9.5]],rF,MAT.pAF);
   TUBE(g,[[9.5,hF,9.5],[9.5,0.8,9.5]],rF*0.7,MAT.pAF);
@@ -1175,31 +1304,35 @@ var MAT={
   var g=GR.gas;
   var R=0.05,hG=1.4;
 
-  /* Medidor exterior fachada este */
-  g.add(pos(BX(0.35,0.45,0.25,new THREE.MeshStandardMaterial({color:0xccaa00,emissive:0x887700,emissiveIntensity:0.3,metalness:0.45})),15.3,1.35,8.5));
-  g.add(LBL('MEDIDOR\nGAS G-4',15.3,2.15,8.5,'#ffdd00',1.2));
+  /* Medidor exterior fachada norte — cerca a la entrada */
+  g.add(pos(BX(0.35,0.45,0.25,new THREE.MeshStandardMaterial({color:0xccaa00,emissive:0x887700,emissiveIntensity:0.3,metalness:0.45})),4,1.35,10.3));
+  g.add(LBL('CONTADOR\nGAS G-4',4,2.15,10.7,'#ffdd00',1.2));
 
-  /* Regulador */
+  /* Regulador al lado del medidor */
   var reg=new THREE.Mesh(new THREE.SphereGeometry(0.15,10,10),new THREE.MeshStandardMaterial({color:0xeebb00,emissive:0xbb8800,emissiveIntensity:0.35}));
-  reg.position.set(15.2,1.8,9);g.add(reg);
-  g.add(LBL('REGULADOR\n2ª ETAPA',15.2,2.3,9,'#ffdd00',1));
+  reg.position.set(4.5,1.8,10.3);g.add(reg);
+  g.add(LBL('REGULADOR\n2ª ETAPA',4.5,2.3,10.7,'#ffdd00',1));
 
-  /* VCG */
-  VALVE(g,15.05,hG,8.5,MAT.pGas);
-  g.add(LBL('V.C.G.',15.05,2,8.5,'#ffdd00',0.8));
+  /* VCG - válvula de corte general */
+  VALVE(g,4,hG,10.15,MAT.pGas);
+  g.add(LBL('V.C.G.',4,2,10.5,'#ffdd00',0.8));
 
-  /* Línea desde medidor */
-  TUBE(g,[[15.3,hG,8.5],[15.05,hG,8.5],[14.5,hG,8.5]],R,MAT.pGas);
+  /* Acometida desde red pública */
+  TUBE(g,[[4,hG,12.5],[4,hG,10.3]],R,MAT.pGas);
+  g.add(LBL('ACOMETIDA\nRED GAS',4,1,12,'#ffdd00',0.9));
 
-  /* Ramal al calentador (en ropas x=14.5, z=8) */
-  TUBE(g,[[14.5,hG,8.5],[14.5,hG,8]],R,MAT.pGas);
-  VALVE(g,14.5,hG,8.2,MAT.pGas);
-  g.add(LBL('V-1',14.5,2,8.2,'#ffdd00',0.7));
+  /* Línea principal: del medidor entra por fachada hacia el interior */
+  TUBE(g,[[4,hG,10.3],[4,hG,10],[4,hG,9.5],[5,hG,9.5],[9,hG,9.5]],R,MAT.pGas);
 
   /* Ramal a estufa (cocina x=10.5, z=9.7) */
-  TUBE(g,[[14.5,hG,8.5],[12,hG,8.5],[10.5,hG,8.5],[10.5,hG,9.3]],R,MAT.pGas);
+  TUBE(g,[[9,hG,9.5],[10.5,hG,9.5],[10.5,hG,9.3]],R,MAT.pGas);
   VALVE(g,10.5,hG,9.0,MAT.pGas);
-  g.add(LBL('V-2',10.5,2,9,'#ffdd00',0.7));
+  g.add(LBL('V-1',10.5,2,9,'#ffdd00',0.7));
+
+  /* Ramal al calentador (en ropas x=14.5, z=8) — va por techo cocina */
+  TUBE(g,[[9,hG,9.5],[12,hG,9.5],[14.5,hG,9.5],[14.5,hG,8]],R,MAT.pGas);
+  VALVE(g,14.5,hG,8.2,MAT.pGas);
+  g.add(LBL('V-2',14.5,2,8.2,'#ffdd00',0.7));
   /* Flexible */
   TUBE(g,[[10.5,hG,9.1],[10.5,hG,9.5]],R*0.45,new THREE.MeshStandardMaterial({color:0xbbaa00,emissive:0x887700,emissiveIntensity:0.2,roughness:0.6}));
   g.add(LBL('FLEX ½"',10.8,hG+0.2,9.3,'#ccaa00',0.7));
@@ -1257,6 +1390,7 @@ function ly(l,btn){
   GR.gas.visible=l===4;
   GR.roof.visible=(l===0||l===5)&&roofOn;
   GR.lbl.visible=lblOn&&l===0;
+  GR.meters.visible=true; /* contadores siempre visibles */
 
   /* transparency */
   GR.arch.traverse(function(ch){
@@ -1270,6 +1404,19 @@ function ly(l,btn){
       }
     }
   });
+  /* meters: full opacity always, but slightly transparent in non-arch views for context */
+  GR.meters.traverse(function(ch){
+    if(ch.isMesh&&origMat.has(ch)){
+      if(l===0||l===5){
+        ch.material=origMat.get(ch);
+      } else {
+        /* keep meters semi-visible in technical views */
+        var cm=origMat.get(ch).clone();
+        cm.transparent=true;cm.opacity=0.85;cm.depthWrite=true;
+        ch.material=cm;
+      }
+    }
+  });
   GR.gnd.traverse(function(ch){
     if(ch.isMesh){
       var c=ch.material.clone();c.transparent=l!==0;c.opacity=l===0?1:0.2;ch.material=c;
@@ -1280,11 +1427,11 @@ function ly(l,btn){
 }
 
 var LEGS={
-  0:{t:'ARQUITECTÓNICA',i:[[0,'#f7f3ec','Muros ext. 0.15m'],[0,'#f2ede6','Muros int. 0.12m'],[0,'#88aabb','Ventanas'],[0,'#7a5c1e','Puertas'],[0,'#5f6e52','Mobiliario']]},
+  0:{t:'ARQUITECTÓNICA',i:[[0,'#f7f3ec','Muros ext. 0.15m'],[0,'#f2ede6','Muros int. 0.12m'],[0,'#88aabb','Ventanas'],[0,'#7a5c1e','Puertas'],[0,'#5f6e52','Mobiliario'],[0,'#2255aa','Contador agua'],[0,'#bbaa00','Contador gas'],[0,'#333333','Contador eléctrico']]},
   1:{t:'CIMENTACIÓN — 26 ZAPATAS AISLADAS',i:[[1,'#7a7a7a','Zapata 1.20×1.20×1.00m'],[1,'#999999','Columna 0.30×0.30m'],[1,'#a8a8a8','Viga amarre 0.30×0.30m']]},
-  2:{t:'INSTALACIÓN ELÉCTRICA — 6 CIRCUITOS',i:[[1,'#ee1111','C-1/C-2 Iluminación'],[1,'#2266ff','C-3/C-4 Tomacorrientes'],[1,'#ff6622','C-5 Estufa 30A'],[1,'#8844ff','C-6 Lavadora 20A'],[0,'#ffee44','Luminarias'],[0,'#ffeedd','Tomas/Interruptores'],[0,'#1a1a1a','Tablero 2×60A']]},
-  3:{t:'INSTALACIÓN HIDRÁULICA',i:[[1,'#1a77cc','AF PVC-P ½"'],[1,'#dd3318','AC CPVC ½"'],[1,'#1a8a3a','Desagüe PVC-S 2"-4"'],[0,'#22cc55','Sifones'],[0,'#2a5530','Caja inspección'],[0,'#dd5515','Calentador a gas']]},
-  4:{t:'INSTALACIÓN DE GAS',i:[[1,'#ddaa00','Cobre tipo L ½"'],[1,'#bbaa00','Flexible certificado'],[0,'#ccaa00','Medidor + Regulador'],[0,'#dd0000','Válvulas de corte'],[1,'#777','Ducto evacuación Ø4"']]},
+  2:{t:'INSTALACIÓN ELÉCTRICA — 7 CIRCUITOS',i:[[0,'#222222','Contador eléctrico (fachada)'],[0,'#1a1a1a','Tablero ppal. 2×60A'],[1,'#ee1111','Acometida + C-1/C-2 Ilum.'],[1,'#2266ff','C-3/C-4 Tomacorrientes'],[1,'#ff6622','C-5 Estufa 30A'],[1,'#8844ff','C-6 Lavadora 20A'],[0,'#ffee44','Luminarias'],[0,'#ffeedd','Tomas/Interruptores']]},
+  3:{t:'INSTALACIÓN HIDRÁULICA',i:[[0,'#1a55aa','Contador agua (fachada)'],[1,'#1a77cc','AF PVC-P ½"'],[1,'#dd3318','AC CPVC ½"'],[1,'#1a8a3a','Desagüe PVC-S 2"-4"'],[0,'#22cc55','Sifones'],[0,'#2a5530','Caja inspección'],[0,'#dd5515','Calentador a gas']]},
+  4:{t:'INSTALACIÓN DE GAS',i:[[0,'#ccaa00','Contador gas (fachada)'],[1,'#ddaa00','Cobre tipo L ½"'],[1,'#bbaa00','Flexible certificado'],[0,'#dd0000','Válvulas de corte'],[1,'#777','Ducto evacuación Ø4"']]},
   5:{t:'CUBIERTA — 4 AGUAS',i:[[0,'#ab5030','Teja termoacústica'],[0,'#7a3d1e','Cumbrera'],[0,'#3a7a9a','Bajantes PVC Ø3"']]}
 };
 
