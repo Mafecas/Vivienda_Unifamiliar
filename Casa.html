@@ -909,34 +909,103 @@ var MAT={
   g.add(pos(BX(0.03,0.2,hd*2,fasciaM),cx-hw,by+0.1,cz));
   g.add(pos(BX(0.03,0.2,hd*2,fasciaM),cx+hw,by+0.1,cz));
 
-  /* ── CANALES METÁLICAS (justo en el borde del alero) ── */
-  /* Norte y Sur - base + borde exterior */
-  g.add(pos(BX(15,0.04,0.12,canalM),cx,by-0.02,cz+hd));
-  g.add(pos(BX(15,0.06,0.02,canalM),cx,by+0.01,cz+hd+0.05));
-  g.add(pos(BX(15,0.04,0.12,canalM),cx,by-0.02,cz-hd));
-  g.add(pos(BX(15,0.06,0.02,canalM),cx,by+0.01,cz-hd-0.05));
-  /* Oeste y Este */
-  g.add(pos(BX(0.12,0.04,10,canalM),cx-hw,by-0.02,cz));
-  g.add(pos(BX(0.02,0.06,10,canalM),cx-hw-0.05,by+0.01,cz));
-  g.add(pos(BX(0.12,0.04,10,canalM),cx+hw,by-0.02,cz));
-  g.add(pos(BX(0.02,0.06,10,canalM),cx+hw+0.05,by+0.01,cz));
+  /* ── CANALES METÁLICAS RANGO — Perfil en U visible ──
+     Altura canal: by = WH+0.2 = 3.00m desde el suelo
+     Canal en el borde del alero, perfil de 15cm de ancho × 8cm alto */
+  var canalW=0.15, canalH=0.08;
 
-  /* ── BAJANTES PVC 3" (en esquinas de la CASA, no del alero) ── */
-  var bajM=new THREE.MeshStandardMaterial({color:0x3a7a9a,roughness:0.25,metalness:0.2});
-  var bajantes=[[0.08,9.92],[0.08,0.08],[14.92,9.92],[14.92,0.08]];
-  bajantes.forEach(function(b){
-    /* Tubo vertical pegado a la esquina del muro */
-    var tubo=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,WH,8),bajM);
-    tubo.position.set(b[0],WH/2+0.2,b[1]);g.add(tubo);
-    /* Codo arriba conectando a la canal */
-    var codoS=new THREE.Mesh(new THREE.SphereGeometry(0.05,6,6),bajM);
-    codoS.position.set(b[0],by-0.05,b[1]);g.add(codoS);
-    /* Tramo corto horizontal del codo a la canal */
-    var dx=b[0]<cx?-0.15:0.15;
-    var dz=b[1]<cz?-0.15:0.15;
-    g.add(pos(BX(Math.abs(dx)*2,0.06,0.06,bajM),b[0]+dx/2,by-0.05,b[1]));
-    g.add(pos(BX(0.06,0.06,Math.abs(dz)*2,bajM),b[0],by-0.05,b[1]+dz/2));
+  /* Norte (z=cz+hd = 10.5) */
+  g.add(pos(BX(hw*2, 0.02, canalW, canalM), cx, by-0.01, cz+hd));         /* base */
+  g.add(pos(BX(hw*2, canalH, 0.02, canalM), cx, by+canalH/2-0.02, cz+hd+canalW/2)); /* borde ext */
+  g.add(pos(BX(hw*2, canalH*0.6, 0.02, canalM), cx, by+canalH*0.3-0.02, cz+hd-canalW/2)); /* borde int */
+
+  /* Sur (z=cz-hd = -0.5) */
+  g.add(pos(BX(hw*2, 0.02, canalW, canalM), cx, by-0.01, cz-hd));
+  g.add(pos(BX(hw*2, canalH, 0.02, canalM), cx, by+canalH/2-0.02, cz-hd-canalW/2));
+  g.add(pos(BX(hw*2, canalH*0.6, 0.02, canalM), cx, by+canalH*0.3-0.02, cz-hd+canalW/2));
+
+  /* Oeste (x=cx-hw = -0.5) */
+  g.add(pos(BX(canalW, 0.02, hd*2, canalM), cx-hw, by-0.01, cz));
+  g.add(pos(BX(0.02, canalH, hd*2, canalM), cx-hw-canalW/2, by+canalH/2-0.02, cz));
+  g.add(pos(BX(0.02, canalH*0.6, hd*2, canalM), cx-hw+canalW/2, by+canalH*0.3-0.02, cz));
+
+  /* Este (x=cx+hw = 15.5) */
+  g.add(pos(BX(canalW, 0.02, hd*2, canalM), cx+hw, by-0.01, cz));
+  g.add(pos(BX(0.02, canalH, hd*2, canalM), cx+hw+canalW/2, by+canalH/2-0.02, cz));
+  g.add(pos(BX(0.02, canalH*0.6, hd*2, canalM), cx+hw-canalW/2, by+canalH*0.3-0.02, cz));
+
+  /* Uniones de esquina (tapas) */
+  [[cx-hw,cz+hd],[cx+hw,cz+hd],[cx-hw,cz-hd],[cx+hw,cz-hd]].forEach(function(p){
+    g.add(pos(BX(canalW,canalH,canalW,canalM),p[0],by+canalH/2-0.02,p[1]));
   });
+
+  /* Labels canal */
+  g.add(LBL('CANAL RANGO\nh=3.00m',cx,by+0.5,cz+hd+0.5,'#aaaaaa',1.0));
+  g.add(LBL('CANAL\nh=3.00m',cx,by+0.5,cz-hd-0.5,'#aaaaaa',0.8));
+
+  /* ── BAJANTES PVC 3" — Tubo vertical completo desde canal hasta el suelo ──
+     4 bajantes en las esquinas de la CASA (no del alero)
+     Altura total: desde h=3.00m (canal) hasta h=0.00m (suelo) = 3.00m
+     Diámetro exterior 3" = 0.075m aprox → radio 0.038m */
+  var bajM=new THREE.MeshStandardMaterial({color:0x3a7a9a,roughness:0.25,metalness:0.3});
+  var bajR=0.038; /* radio tubo 3" */
+  var bajLblM='#3a99bb';
+
+  var bajantes=[[0.15,9.85,'NW'],[14.85,9.85,'NE'],[0.15,0.15,'SW'],[14.85,0.15,'SE']];
+  bajantes.forEach(function(b){
+    var bx=b[0], bz=b[1], label=b[2];
+
+    /* Tubo vertical principal: del suelo (0.10m) hasta la canal (by=3.00m) */
+    var tuboH=by-0.1;
+    var tubo=new THREE.Mesh(new THREE.CylinderGeometry(bajR,bajR,tuboH,10),bajM);
+    tubo.position.set(bx, 0.1+tuboH/2, bz);
+    tubo.castShadow=true;
+    g.add(tubo);
+
+    /* Codo superior: conecta tubo vertical con canal horizontal */
+    var codoTop=new THREE.Mesh(new THREE.SphereGeometry(bajR*1.5,8,8),bajM);
+    codoTop.position.set(bx, by-0.02, bz);
+    g.add(codoTop);
+
+    /* Tramo horizontal corto hacia la canal (alero) */
+    var hOffX = bx<cx ? -0.3 : 0.3;
+    var hOffZ = bz<cz ? -0.3 : 0.3;
+    var hPipe1=new THREE.Mesh(new THREE.CylinderGeometry(bajR,bajR,0.35,8),bajM);
+    hPipe1.rotation.z=Math.PI/2;
+    hPipe1.position.set(bx+hOffX/2, by-0.02, bz);
+    g.add(hPipe1);
+    var hPipe2=new THREE.Mesh(new THREE.CylinderGeometry(bajR,bajR,0.35,8),bajM);
+    hPipe2.rotation.x=Math.PI/2;
+    hPipe2.position.set(bx, by-0.02, bz+hOffZ/2);
+    g.add(hPipe2);
+
+    /* Codo inferior: salida al piso (desagüe pluvial) */
+    var codoBot=new THREE.Mesh(new THREE.SphereGeometry(bajR*1.5,8,8),bajM);
+    codoBot.position.set(bx, 0.12, bz);
+    g.add(codoBot);
+
+    /* Tramo salida horizontal al piso */
+    var salida=new THREE.Mesh(new THREE.CylinderGeometry(bajR,bajR,0.4,8),bajM);
+    salida.rotation.x=Math.PI/2;
+    salida.position.set(bx, 0.08, bz+(bz<cz?-0.25:0.25));
+    g.add(salida);
+
+    /* Abrazaderas (anillos de sujeción) cada metro */
+    var abrazM=new THREE.MeshStandardMaterial({color:0x555555,metalness:0.5,roughness:0.3});
+    for(var ah=0.8; ah<by-0.3; ah+=0.8){
+      var abraz=new THREE.Mesh(new THREE.TorusGeometry(bajR+0.01,0.008,6,12),abrazM);
+      abraz.position.set(bx, ah, bz);
+      g.add(abraz);
+    }
+
+    /* Label */
+    g.add(LBL('BAJ.3\"\n'+label,bx+(bx<cx?-0.4:0.4),1.8,bz,bajLblM,0.7));
+  });
+
+  /* Labels de altura */
+  g.add(LBL('NIVEL CANAL\n+3.00m',cx-hw-1.5,by,cz,'#aaaaaa',1.0));
+  g.add(LBL('NIVEL PISO\n±0.00m',-1.5,0.3,5,'#aaaaaa',0.8));
+  g.add(LBL('CUMBRERA\n+5.00m',cx,by+h+0.6,cz,'#ab5030',0.9));
 })();
 
 /* ══════════════════════════════════════
@@ -1530,7 +1599,7 @@ var LEGS={
   2:{t:'INSTALACIÓN ELÉCTRICA — 7 CIRCUITOS',i:[[0,'#222222','Contador eléctrico (fachada)'],[0,'#1a1a1a','Tablero ppal. 2×60A'],[1,'#ee1111','Acometida + C-1/C-2 Ilum.'],[1,'#2266ff','C-3/C-4 Tomacorrientes'],[1,'#ff6622','C-5 Estufa 30A'],[1,'#8844ff','C-6 Lavadora 20A'],[0,'#ffee44','Luminarias'],[0,'#ffeedd','Tomas/Interruptores']]},
   3:{t:'INSTALACIÓN HIDRÁULICA',i:[[0,'#1a55aa','Contador agua (fachada)'],[1,'#1a77cc','AF PVC-P ½"'],[1,'#dd3318','AC CPVC ½"'],[1,'#1a8a3a','Desagüe PVC-S 2"-4"'],[0,'#22cc55','Sifones'],[0,'#2a5530','3 Cajas inspección 60×60'],[0,'#dd5515','Calentador a gas']]},
   4:{t:'INSTALACIÓN DE GAS',i:[[0,'#ccaa00','Contador gas (fachada)'],[1,'#ddaa00','Cobre tipo L ½"'],[1,'#bbaa00','Flexible certificado'],[0,'#dd0000','Válvulas de corte'],[1,'#777','Ducto evacuación Ø4"']]},
-  5:{t:'CUBIERTA — 4 AGUAS',i:[[0,'#ab5030','Teja termoacústica'],[0,'#7a3d1e','Cumbrera'],[0,'#3a7a9a','Bajantes PVC Ø3"']]}
+  5:{t:'CUBIERTA — 4 AGUAS',i:[[0,'#ab5030','Teja termoacústica'],[0,'#7a3d1e','Cumbrera +5.00m'],[0,'#888888','Canal rango h=+3.00m'],[0,'#3a7a9a','Bajantes PVC Ø3" (4 esq.)'],[0,'#f0e8d8','Fascia alero 0.50m']]}
 };
 
 function updLeg(){
