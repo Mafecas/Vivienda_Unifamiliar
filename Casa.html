@@ -642,24 +642,51 @@ var MAT={
   */
 
   /* NORTH z=10: puerta + 3 ventanas */
-  HW(10, [[0,2.0],[3.0,6.15],[7.85,9.8],[11.3,12.9],[14.1,15]], ET, MAT.wallE);
+  /* N1 comedor x=7.0 w=1.5 → 6.25-7.75 */
+  /* N2 cocina x=9.7 w=1.4 → 9.0-10.4 (ANCHA pero BAJA: h=0.70m, de 0.90 a 1.60m) */
+  /* N3 ropas x=13.5 w=1.0 → 13.0-14.0 */
+  HW(10, [[0,2.0],[3.0,6.25],[7.75,9.0],[10.4,13.0],[14.0,15]], ET, MAT.wallE);
   HDR(2.5, 10, 1.0, ET, MAT.wallE);
-  HWIN(7.0, 10, 1.5, ET, MAT.wallE);    /* N1: comedor */
-  HWIN(10.55, 10, 1.2, ET, MAT.wallE);  /* N2: cocina */
-  HWIN(13.5, 10, 1.0, ET, MAT.wallE);   /* N3: z.ropas */
+  HWIN(7.0, 10, 1.5, ET, MAT.wallE);    /* N1: comedor (estándar) */
+  /* N2: cocina — ventana ESPECIAL ancha y baja (no usa HWIN estándar) */
+  (function(){
+    var cx=9.7, ww=1.4, z=10, t=ET;
+    var kSill=0.90, kTop=1.60, kH=kTop-kSill; /* sólo 70cm de alto */
+    /* dintel: muro arriba de la ventana hasta el techo */
+    g.add(pos(BX(ww+0.1, WH-kTop, t, MAT.wallE), cx, kTop+(WH-kTop)/2+0.2, z));
+    /* antepecho: muro debajo de la ventana */
+    g.add(pos(BX(ww+0.1, kSill, t, MAT.wallE), cx, kSill/2+0.2, z));
+    /* repisa exterior */
+    g.add(pos(BX(ww+0.2, 0.04, t+0.1, sillMat), cx, kSill+0.2, z+0.05));
+    /* marco */
+    var fw=0.04;
+    g.add(pos(BX(ww, fw, t+0.02, frameMat2), cx, kSill+fw/2+0.2, z));
+    g.add(pos(BX(ww, fw, t+0.02, frameMat2), cx, kTop-fw/2+0.2, z));
+    g.add(pos(BX(fw, kH, t+0.02, frameMat2), cx-ww/2+fw/2, kSill+kH/2+0.2, z));
+    g.add(pos(BX(fw, kH, t+0.02, frameMat2), cx+ww/2-fw/2, kSill+kH/2+0.2, z));
+    /* parteluz vertical centro */
+    g.add(pos(BX(0.03, kH-0.08, t+0.01, frameMat2), cx, kSill+kH/2+0.2, z));
+    /* vidrios (2 paneles horizontales, no 4) */
+    var gw=(ww-0.11)/2, gh=kH-0.08;
+    g.add(pos(BX(gw, gh, 0.01, glassMat), cx-gw/2-0.025, kSill+kH/2+0.2, z));
+    g.add(pos(BX(gw, gh, 0.01, glassMat), cx+gw/2+0.025, kSill+kH/2+0.2, z));
+  })();
+  HWIN(13.5, 10, 1.0, ET, MAT.wallE);   /* N3: z.ropas (estándar) */
 
-  /* SOUTH z=0: 3 ventanas (hab2 más pequeña por baño) */
-  HW(0, [[0,2.15],[3.85,9.0],[10.0,12.15],[13.85,15]], ET, MAT.wallE);
-  HWIN(3.0, 0, 1.5, ET, MAT.wallE);    /* S1: hab principal */
-  HWIN(9.5, 0, 0.8, ET, MAT.wallE);    /* S2: hab 2 (pequeña, evita baño x=6.5-8.5) */
-  HWIN(13.0, 0, 1.5, ET, MAT.wallE);   /* S3: hab 3 */
+  /* SOUTH z=0: 3 ventanas (hab2 más pequeña y centrada lejos del baño) */
+  /* Closet muro x=3.5, Baño ppal muro x=5 → ventana hab.ppal ANTES de x=3.5 */
+  HW(0, [[0,1.3],[2.7,9.25],[9.75,12.15],[13.85,15]], ET, MAT.wallE);
+  HWIN(2.0, 0, 1.2, ET, MAT.wallE);    /* S1: hab principal (x=1.4-2.6, NO toca closet x=3.5) */
+  HWIN(9.5, 0, 0.5, ET, MAT.wallE);    /* S2: hab 2 (x=9.25-9.75, PEQUEÑA 50cm) */
+  HWIN(13.0, 0, 1.5, ET, MAT.wallE);   /* S3: hab 3 (x=12.25-13.75) */
 
   /* WEST x=0: 1 ventana sala */
   VW(0, [[0,6.75],[8.25,10]], ET, MAT.wallE);
   VWIN(0, 7.5, 1.5, ET, MAT.wallE);    /* W1: sala */
 
   /* EAST x=15: 1 ventana z.ropas */
-  VW(15, [[0,7.8],[9.1,10]], ET, MAT.wallE);
+  /* E1 ropas z=8.5 w=1.2 → 7.9-9.1 */
+  VW(15, [[0,7.9],[9.1,10]], ET, MAT.wallE);
   VWIN(15, 8.5, 1.2, ET, MAT.wallE);   /* E1: z.ropas (2da ventana) */
 
   /* ═══ INTERIOR WALLS — NEW LAYOUT ═══
