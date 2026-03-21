@@ -647,6 +647,42 @@ var MAT={
   /* N3 ropas x=13.5 w=1.0 → 13.0-14.0 */
   HW(10, [[0,2.0],[3.0,6.25],[7.75,9.0],[10.4,13.0],[14.0,15]], ET, MAT.wallE);
   HDR(2.5, 10, 1.0, ET, MAT.wallE);
+  /* ── PUERTA PRINCIPAL: Reemplazar panel madera por METAL ── */
+  (function(){
+    /* Quitar el panel de madera que puso HDR y poner uno metálico */
+    /* El panel de HDR ya está pero lo tapamos con uno metálico encima */
+    var metalDoorMat=new THREE.MeshStandardMaterial({
+      color:0x2a2a2a, roughness:0.15, metalness:0.85,
+      envMapIntensity:1.2
+    });
+    var metalFrameMat=new THREE.MeshStandardMaterial({
+      color:0x1a1a1a, roughness:0.1, metalness:0.9
+    });
+    var handleMat=new THREE.MeshStandardMaterial({
+      color:0xccaa44, roughness:0.1, metalness:0.95
+    });
+    var px=2.5, pz=10, pw=1.0;
+    /* Panel metálico principal */
+    g.add(pos(BX(pw-0.04, doorH-0.04, 0.05, metalDoorMat), px, doorH/2+0.2, pz));
+    /* Molduras horizontales decorativas (3 líneas) */
+    for(var mh=0.5; mh<doorH-0.3; mh+=0.55){
+      g.add(pos(BX(pw-0.1, 0.02, 0.06, metalFrameMat), px, mh+0.2, pz));
+    }
+    /* Molduras verticales (2 paneles) */
+    g.add(pos(BX(0.02, doorH-0.2, 0.06, metalFrameMat), px-pw/4, doorH/2+0.2, pz));
+    g.add(pos(BX(0.02, doorH-0.2, 0.06, metalFrameMat), px+pw/4, doorH/2+0.2, pz));
+    /* Marco metálico grueso */
+    g.add(pos(BX(0.06, doorH, 0.07, metalFrameMat), px-pw/2+0.02, doorH/2+0.2, pz));
+    g.add(pos(BX(0.06, doorH, 0.07, metalFrameMat), px+pw/2-0.02, doorH/2+0.2, pz));
+    g.add(pos(BX(pw+0.04, 0.06, 0.07, metalFrameMat), px, doorH+0.2, pz));
+    /* Manija (cerradura digital) */
+    g.add(pos(BX(0.04, 0.12, 0.08, handleMat), px+pw/2-0.12, 1.1, pz+0.04));
+    /* Ojo mágico (mirilla) */
+    var mirilla=new THREE.Mesh(new THREE.SphereGeometry(0.015,8,8), handleMat);
+    mirilla.position.set(px, 1.55, pz+0.04); g.add(mirilla);
+    /* Label */
+    g.add(LBL('PUERTA\nSEGURIDAD\nMETÁLICA',px,1.0,pz+0.5,'#aaaaaa',0.7));
+  })();
   HWIN(7.0, 10, 1.5, ET, MAT.wallE);    /* N1: comedor (estándar) */
   /* N2: cocina — ventana ESPECIAL ancha y baja (no usa HWIN estándar) */
   (function(){
