@@ -633,43 +633,34 @@ var MAT={
   }
 
   /*
-     NORTH z=10: door x=2.0→3.0
-     Windows: N1 center x=6.0 w=2.0, N2 center x=10.75 w=1.5, N3 center x=13.5 w=1.2
-     Wall segments: [0,2.0] DOOR [3.0,4.9] [7.1,9.9] [11.6,12.8] [14.2,15]
+     NUEVA DISTRIBUCIÓN DE VENTANAS (8 ventanas):
+     NORTE z=10: puerta(2-3), comedor(x≈7,w=1.5), cocina(x≈10.5,w=1.2), ropas1(x≈13.5,w=1.0)
+     SUR z=0: hab.ppal(x≈3,w=1.5), hab2(x≈9.5,w=0.8 PEQUEÑA), hab3(x≈13,w=1.5)
+     OESTE x=0: sala(z≈7.5,w=1.5)
+     ESTE x=15: ropas2(z≈8.5,w=1.2)
+     Total: 3N + 3S + 1W + 1E = 8 ventanas
   */
-  HW(10, [[0,2.0],[3.0,4.9],[7.1,9.9],[11.6,12.8],[14.2,15]], ET, MAT.wallE);
+
+  /* NORTH z=10: puerta + 3 ventanas */
+  HW(10, [[0,2.0],[3.0,6.15],[7.85,9.8],[11.3,12.9],[14.1,15]], ET, MAT.wallE);
   HDR(2.5, 10, 1.0, ET, MAT.wallE);
-  HWIN(6.0, 10, 2.0, ET, MAT.wallE);   /* N1: sala-comedor */
-  HWIN(10.75, 10, 1.5, ET, MAT.wallE); /* N2: cocina */
-  HWIN(13.5, 10, 1.2, ET, MAT.wallE);  /* N3: ropas */
+  HWIN(7.0, 10, 1.5, ET, MAT.wallE);    /* N1: comedor */
+  HWIN(10.55, 10, 1.2, ET, MAT.wallE);  /* N2: cocina */
+  HWIN(13.5, 10, 1.0, ET, MAT.wallE);   /* N3: z.ropas */
 
-  /*
-     SOUTH z=0: no doors
-     Windows: S1 center x=2.5 w=2.0, S2 center x=8.5 w=2.0, S3 center x=13.0 w=2.0
-     Wall segments: [0,1.4] [3.6,7.4] [9.6,11.9] [14.1,15]
-  */
-  HW(0, [[0,1.4],[3.6,7.4],[9.6,11.9],[14.1,15]], ET, MAT.wallE);
-  HWIN(2.5, 0, 2.0, ET, MAT.wallE);   /* S1: hab principal */
-  HWIN(8.5, 0, 2.0, ET, MAT.wallE);   /* S2: hab 2 */
-  HWIN(13.0, 0, 2.0, ET, MAT.wallE);  /* S3: hab 3 */
+  /* SOUTH z=0: 3 ventanas (hab2 más pequeña por baño) */
+  HW(0, [[0,2.15],[3.85,9.0],[10.0,12.15],[13.85,15]], ET, MAT.wallE);
+  HWIN(3.0, 0, 1.5, ET, MAT.wallE);    /* S1: hab principal */
+  HWIN(9.5, 0, 0.8, ET, MAT.wallE);    /* S2: hab 2 (pequeña, evita baño x=6.5-8.5) */
+  HWIN(13.0, 0, 1.5, ET, MAT.wallE);   /* S3: hab 3 */
 
-  /*
-     WEST x=0: no doors
-     Windows: W1 center z=7.5 w=2.0 (sala), W2 center z=2.5 w=2.0 (hab ppal)
-     Wall segments: [0,1.4] [3.6,6.4] [8.6,10]
-  */
-  VW(0, [[0,1.4],[3.6,6.4],[8.6,10]], ET, MAT.wallE);
-  VWIN(0, 7.5, 2.0, ET, MAT.wallE);   /* W1: sala */
-  VWIN(0, 2.5, 2.0, ET, MAT.wallE);   /* W2: hab principal */
+  /* WEST x=0: 1 ventana sala */
+  VW(0, [[0,6.75],[8.25,10]], ET, MAT.wallE);
+  VWIN(0, 7.5, 1.5, ET, MAT.wallE);    /* W1: sala */
 
-  /*
-     EAST x=15: no doors
-     Windows: E1 center z=8.25 w=1.5 (ropas), E2 center z=3.0 w=2.0 (hab 3)
-     Wall segments: [0,1.9] [4.1,7.4] [9.1,10]
-  */
-  VW(15, [[0,1.9],[4.1,7.4],[9.1,10]], ET, MAT.wallE);
-  VWIN(15, 8.25, 1.5, ET, MAT.wallE);  /* E1: ropas */
-  VWIN(15, 3.0, 2.0, ET, MAT.wallE);   /* E2: hab 3 */
+  /* EAST x=15: 1 ventana z.ropas */
+  VW(15, [[0,7.8],[9.1,10]], ET, MAT.wallE);
+  VWIN(15, 8.5, 1.2, ET, MAT.wallE);   /* E1: z.ropas (2da ventana) */
 
   /* ═══ INTERIOR WALLS — NEW LAYOUT ═══
      Paso de circulación x=9-13, z=5-7
@@ -904,6 +895,19 @@ var MAT={
   g.add(pos(BX(0.8,0.04,0.7,luxMarble),7.3,0.22,1.2));
   g.add(pos(BX(0.03,2,0.7,luxGlass),7.7,1.2,1.2));
 
+  /* ─── REJILLAS VENTILACIÓN EN 3 BAÑOS ─── */
+  var rejMat=new THREE.MeshStandardMaterial({color:0xcccccc,roughness:0.3,metalness:0.4});
+  var rejSlat=new THREE.MeshStandardMaterial({color:0xaaaaaa,roughness:0.3,metalness:0.3});
+  /* Baño Principal (pared z=0, x≈4.2) — rejilla 20×20cm */
+  g.add(pos(BX(0.2,0.2,0.02,rejMat),4.2,2.3,0.08));
+  for(var rs=0;rs<4;rs++) g.add(pos(BX(0.18,0.015,0.01,rejSlat),4.2,2.22+rs*0.05,0.08));
+  /* Baño 2 (pared z=0, x≈7.5) — rejilla 20×20cm */
+  g.add(pos(BX(0.2,0.2,0.02,rejMat),7.5,2.3,0.08));
+  for(rs=0;rs<4;rs++) g.add(pos(BX(0.18,0.015,0.01,rejSlat),7.5,2.22+rs*0.05,0.08));
+  /* Baño Social (pared x=15, z≈6) — rejilla 20×20cm */
+  g.add(pos(BX(0.02,0.2,0.2,rejMat),14.92,2.3,6));
+  for(rs=0;rs<4;rs++) g.add(pos(BX(0.01,0.015,0.18,rejSlat),14.92,2.22+rs*0.05,6));
+
   /* ─── Z. ROPAS (12-15, 7-10) ─── */
   g.add(pos(BX(0.6,0.85,0.6,new THREE.MeshStandardMaterial({color:0xe0e0e0,roughness:0.08,metalness:0.3})),13,0.62,9.5));
   g.add(pos(BX(0.6,0.85,0.6,new THREE.MeshStandardMaterial({color:0xe0e0e0,roughness:0.08,metalness:0.3})),13.7,0.62,9.5));
@@ -1020,7 +1024,7 @@ var MAT={
   var bajR=0.038; /* radio tubo 3" */
   var bajLblM='#3a99bb';
 
-  var bajantes=[[0.15,9.85,'NW'],[14.85,9.85,'NE'],[0.15,0.15,'SW'],[14.85,0.15,'SE']];
+  var bajantes=[[-0.2,10.2,'NW'],[15.2,10.2,'NE'],[-0.2,-0.2,'SW'],[15.2,-0.2,'SE']];
   bajantes.forEach(function(b){
     var bx=b[0], bz=b[1], label=b[2];
 
