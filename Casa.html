@@ -47,7 +47,7 @@ canvas{display:block}
   <div class="hud" id="header">
     <div class="card">
       <h1>Vivienda Unifamiliar · 150 m²</h1>
-      <p>Vivienda Unifamiliar de Un Piso — 3 Hab · 3 Baños · 15×10 m<br>
+      <p>1 Piso — 3 Hab · 3 Baños · 15×10 m · <span style="color:#dd4444">N</span>=Entrada<br>
       <span>Clic + arrastrar</span> rotar · <span>Scroll</span> zoom · <span>Clic derecho</span> mover</p>
     </div>
   </div>
@@ -56,7 +56,10 @@ canvas{display:block}
       <div class="tag">Vistas</div>
       <button class="btn on" data-v="3d" onclick="vw('3d',this)"><span class="ic">🏠</span>3D Perspectiva</button>
       <button class="btn" data-v="top" onclick="vw('top',this)"><span class="ic">📐</span>Planta</button>
-      <button class="btn" data-v="front" onclick="vw('front',this)"><span class="ic">🧱</span>Fachada</button>
+      <button class="btn" data-v="front" onclick="vw('front',this)"><span class="ic">🧱</span>Fachada Norte</button>
+      <button class="btn" data-v="south" onclick="vw('south',this)"><span class="ic">🧱</span>Fachada Sur</button>
+      <button class="btn" data-v="west" onclick="vw('west',this)"><span class="ic">🧱</span>Fachada Oeste</button>
+      <button class="btn" data-v="east" onclick="vw('east',this)"><span class="ic">🧱</span>Fachada Este</button>
       <button class="btn" id="bRoof" onclick="tRoof()"><span class="ic">🏗</span>Ocultar techo</button>
       <button class="btn" id="bLbl" onclick="tLbl()"><span class="ic">🏷</span>Ocultar nombres</button>
       <div class="sep"></div>
@@ -73,7 +76,7 @@ canvas{display:block}
     </div>
   </div>
   <div class="hud" id="legend"><div class="card"><h4 id="legT"></h4><div class="lrow" id="legR"></div></div></div>
-  <div class="hud" id="tip"><div class="card">Esc 1:50 · 150 m²</div></div>
+  <div class="hud" id="tip"><div class="card">Esc 1:100 · 150 m²</div></div>
 
   <!-- Walkthrough overlay -->
   <div id="walkOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;z-index:20;pointer-events:none">
@@ -145,7 +148,7 @@ scene.add(new THREE.HemisphereLight(0x88bbee,0x556633,0.35));
    ORBIT
    ══════════════════════════════════════ */
 var dr=0,pn=0,pm={x:0,y:0};
-var sp={r:28,t:0.75,p:1.0};
+var sp={r:28,t:-0.75,p:1.0};
 var tg=new THREE.Vector3(7.5,1,5);
 function cu(){
   cam.position.set(
@@ -344,6 +347,72 @@ var MAT={
   var walkMat=new THREE.MeshStandardMaterial({color:0xc8bfaf,roughness:0.3});
   var walk1=BX(1.2,0.05,3,walkMat);walk1.position.set(2.5,0.03,12.5);walk1.receiveShadow=true;
   GR.gnd.add(walk1);
+
+  /* ═══ BRÚJULA / ORIENTACIÓN ═══
+     z=10 → NORTE (fachada principal, entrada)
+     z=0  → SUR (habitaciones)
+     x=0  → OESTE
+     x=15 → ESTE
+  */
+  var compassX=20, compassZ=14;  /* posición de la brújula en el terreno */
+
+  /* Círculo base de la brújula */
+  var compassRing=new THREE.Mesh(
+    new THREE.RingGeometry(1.2,1.4,32),
+    new THREE.MeshStandardMaterial({color:0x444444,roughness:0.3,side:THREE.DoubleSide})
+  );
+  compassRing.rotation.x=-Math.PI/2;
+  compassRing.position.set(compassX,0.02,compassZ);
+  GR.gnd.add(compassRing);
+
+  /* Círculo interior */
+  var compassInner=new THREE.Mesh(
+    new THREE.CircleGeometry(1.2,32),
+    new THREE.MeshStandardMaterial({color:0x222222,roughness:0.5,transparent:true,opacity:0.7,side:THREE.DoubleSide})
+  );
+  compassInner.rotation.x=-Math.PI/2;
+  compassInner.position.set(compassX,0.015,compassZ);
+  GR.gnd.add(compassInner);
+
+  /* Flecha Norte (roja) — apunta hacia z+ */
+  var arrowNMat=new THREE.MeshStandardMaterial({color:0xdd3333,emissive:0xaa1111,emissiveIntensity:0.3});
+  var arrowN=BX(0.12,0.04,1.0,arrowNMat);
+  arrowN.position.set(compassX,0.04,compassZ+0.5);GR.gnd.add(arrowN);
+  /* Punta de flecha norte */
+  var triGeoN=new THREE.BufferGeometry();
+  triGeoN.setAttribute('position',new THREE.Float32BufferAttribute([
+    compassX-0.25,0.04,compassZ+1.0, compassX+0.25,0.04,compassZ+1.0, compassX,0.04,compassZ+1.5
+  ],3));
+  triGeoN.computeVertexNormals();
+  GR.gnd.add(new THREE.Mesh(triGeoN,arrowNMat));
+
+  /* Flecha Sur (gris) */
+  var arrowSMat=new THREE.MeshStandardMaterial({color:0x888888,roughness:0.4});
+  var arrowS=BX(0.08,0.04,0.8,arrowSMat);
+  arrowS.position.set(compassX,0.04,compassZ-0.4);GR.gnd.add(arrowS);
+
+  /* Flechas Este-Oeste (gris) */
+  var arrowE=BX(0.8,0.04,0.08,arrowSMat);arrowE.position.set(compassX+0.4,0.04,compassZ);GR.gnd.add(arrowE);
+  var arrowW=BX(0.8,0.04,0.08,arrowSMat);arrowW.position.set(compassX-0.4,0.04,compassZ);GR.gnd.add(arrowW);
+
+  /* Labels cardinales en la brújula */
+  GR.gnd.add(LBL('N',compassX,0.3,compassZ+1.8,'#dd3333',1.2));
+  GR.gnd.add(LBL('S',compassX,0.3,compassZ-1.5,'#888888',0.9));
+  GR.gnd.add(LBL('E',compassX+1.6,0.3,compassZ,'#888888',0.9));
+  GR.gnd.add(LBL('O',compassX-1.6,0.3,compassZ,'#888888',0.9));
+
+  /* ═══ LABELS DE FACHADAS EN EL TERRENO ═══ */
+  /* Fachada Norte (principal) */
+  GR.gnd.add(LBL('FACHADA NORTE\n(PRINCIPAL)',7.5,0.3,12.5,'#7ab8ff',1.5));
+
+  /* Fachada Sur */
+  GR.gnd.add(LBL('FACHADA SUR',7.5,0.3,-2.5,'#8a94a6',1.2));
+
+  /* Fachada Oeste */
+  GR.gnd.add(LBL('FACHADA\nOESTE',-2.5,0.3,5,'#8a94a6',1.0));
+
+  /* Fachada Este */
+  GR.gnd.add(LBL('FACHADA\nESTE',17.5,0.3,5,'#8a94a6',1.0));
 
   /* ── PISCINA ── */
   var poolMat=new THREE.MeshStandardMaterial({color:0x2288bb,roughness:0.05,metalness:0.2,transparent:true,opacity:0.8});
@@ -1523,13 +1592,44 @@ var MAT={
 var curL=0, roofOn=true, lblOn=true;
 
 function vw(v,btn){
-  if(walkMode) toggleWalk(); /* exit walk mode first */
+  if(walkMode) toggleWalk();
   var bs=document.querySelectorAll('[data-v]');
   for(var i=0;i<bs.length;i++)bs[i].classList.remove('on');
   if(btn)btn.classList.add('on');
-  if(v==='3d'){sp={r:28,t:0.75,p:1.0};tg.set(7.5,1,5);}
-  else if(v==='top'){sp={r:22,t:0,p:0.02};tg.set(7.5,0,5);}
-  else if(v==='front'){sp={r:20,t:Math.PI/2,p:1.35};tg.set(7.5,1.8,5);}
+  /*
+    Plano DXF: x=0→15 izq→der, y=0(sur)→10(norte) abajo→arriba
+    Modelo 3D: x=0→15, z=0(sur)→10(norte)
+    z=10 → NORTE (fachada principal, entrada)
+    z=0  → SUR   (habitaciones)
+  */
+  cam.up.set(0,1,0);
+  if(v==='3d'){sp={r:28,t:-0.75,p:1.0};tg.set(7.5,1,5);}
+  else if(v==='top'){
+    /* Vista planta: cámara desde el norte mirando hacia el sur
+       x va hacia la derecha en pantalla (correcto)
+       Nota: z=10 (norte) queda abajo en pantalla (limitación 3D) */
+    sp={r:25,t:Math.PI/2,p:0.08};tg.set(7.5,0,5);
+  }
+  else if(v==='front'){
+    /* Fachada NORTE: cámara al norte (z+), mirando hacia el sur
+       Así vemos la entrada, contadores, ventanas N1-N3 */
+    sp={r:22,t:Math.PI/2,p:1.35};tg.set(7.5,1.8,5);
+  }
+  else if(v==='south'){
+    /* Fachada SUR: cámara al sur (z-), mirando al norte
+       Vemos las 3 ventanas de habitaciones S1-S3 */
+    sp={r:22,t:-Math.PI/2,p:1.35};tg.set(7.5,1.8,5);
+  }
+  else if(v==='west'){
+    /* Fachada OESTE: cámara al oeste (x-), mirando al este
+       Vemos sala y hab. principal con ventanas W1-W2 */
+    sp={r:22,t:Math.PI,p:1.35};tg.set(7.5,1.8,5);
+  }
+  else if(v==='east'){
+    /* Fachada ESTE: cámara al este (x+), mirando al oeste
+       Vemos ropas y hab.3 con ventanas E1-E2 */
+    sp={r:22,t:0,p:1.35};tg.set(7.5,1.8,5);
+  }
   cu();
 }
 
@@ -1679,7 +1779,7 @@ function toggleWalk(){
     /* Set FPS camera */
     cam.fov=70;
     cam.updateProjectionMatrix();
-    fpPos.set(2.5,1.7,7.5);
+    fpPos.set(12.5,1.7,7.5);
     fpYaw=0;fpPitch=0;
     ambLight.intensity=0.8; /* brighter inside luxury */
 
@@ -1794,6 +1894,14 @@ function drawMinimap(){
     ['H',2,6.5,8.5,[[7.1,7.9]]],
     ['V',8.5,0,2,[]]
   ];
+  /* Mirror minimap walls */
+  for(var mi2=0;mi2<mwalls.length;mi2++){
+    var mw2=mwalls[mi2];
+    if(mw2[0]==='H'){
+      var mn2=15-mw2[3],mx2=15-mw2[2];mw2[2]=mn2;mw2[3]=mx2;
+      for(var md2=0;md2<mw2[4].length;md2++){var a3=mw2[4][md2][0],b3=mw2[4][md2][1];mw2[4][md2]=[15-b3,15-a3];}
+    } else { mw2[1]=15-mw2[1]; }
+  }
   for(var mwi=0;mwi<mwalls.length;mwi++){
     var mw=mwalls[mwi];
     var segs=[];
@@ -1837,8 +1945,8 @@ function drawMinimap(){
   ctx.strokeStyle='rgba(68,220,100,0.8)';
   ctx.lineWidth=2.5;
   ctx.beginPath();
-  ctx.moveTo(ox+2.0*sx, oz+0);
-  ctx.lineTo(ox+3.0*sx, oz+0);
+  ctx.moveTo(ox+(15-3.0)*sx, oz+0);
+  ctx.lineTo(ox+(15-2.0)*sx, oz+0);
   ctx.stroke();
 
   /* Player position */
@@ -2015,6 +2123,54 @@ function updateWalk(){
   /* Update minimap */
   drawMinimap();
 }
+
+/* ══════════════════════════════════════
+   ESPEJO IZQUIERDA-DERECHA
+   Para que la sala quede donde la cocina
+   y hab.principal donde hab.3
+   ══════════════════════════════════════ */
+(function mirrorHouse(){
+  /* 1. Espejo visual: todos los grupos 3D */
+  for(var mk in GR){
+    GR[mk].scale.x = -1;
+    GR[mk].position.x = 15;
+  }
+  /* 2. Arreglar caras invertidas por el espejo */
+  scene.traverse(function(obj){
+    if(obj.isMesh && obj.material){
+      if(Array.isArray(obj.material)){
+        obj.material.forEach(function(m){ m.side=THREE.DoubleSide; });
+      } else {
+        obj.material.side=THREE.DoubleSide;
+      }
+    }
+  });
+  /* 3. Espejo muros de colisión (walkthrough) */
+  function mirrorWalls(walls){
+    for(var i=0;i<walls.length;i++){
+      var w=walls[i];
+      if(w[0]==='H'){
+        var nMin=15-w[3], nMax=15-w[2];
+        w[2]=nMin; w[3]=nMax;
+        for(var d=0;d<w[4].length;d++){
+          var a=w[4][d][0], b=w[4][d][1];
+          w[4][d]=[15-b, 15-a];
+        }
+      } else {
+        w[1]=15-w[1];
+      }
+    }
+  }
+  mirrorWalls(WALLS);
+  /* 4. Espejo límites de habitaciones */
+  for(var i=0;i<roomBounds.length;i++){
+    var rb=roomBounds[i];
+    var nx1=15-rb.x2, nx2=15-rb.x1;
+    rb.x1=nx1; rb.x2=nx2;
+  }
+  /* 5. Espejo posición inicial del recorrido */
+  fpPos.set(15-2.5, 1.7, 7.5);
+})();
 
 /* ══════════════════════════════════════
    RENDER LOOP
